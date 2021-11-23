@@ -9,6 +9,7 @@ from titleScreen import TitleScreen
 from gameClient import OnlineGame
 from threading import Thread
 import pyperclip
+import socket
 
 class Communicate(QObject):
     closeApp = pyqtSignal()
@@ -20,11 +21,15 @@ class OnlineScreen(TitleScreen):
     def initButtonActions(self):
         self.backButton.clicked.connect(self.backClick)
         self.createGameButton.clicked.connect(lambda: self.connectToServer())
-        self.joinGameButton.clicked.connect(lambda: self.changeScreen(4))
+        self.joinGameButton.clicked.connect(self.joinGameButtonFunc)
 
     def backClick(self):
         self.changeScreen(0)
         self.main.online = False
+
+    def joinGameButtonFunc(self):
+        self.changeScreen(4)
+        self.main.joinGameScreen.gameCodeText.setPlaceholderText("Game Code")
 
     def connectToServer(self):
         self.changeScreen(3)
@@ -47,7 +52,7 @@ class CreateGameScreen(TitleScreen):
         self.game_code = "000000"
 
     def initButtonActions(self):
-        self.backButton.clicked.connect(lambda: self.changeScreen(2))
+        self.backButton.clicked.connect(self.backButtonFunc)
         self.copyCodeButton.clicked.connect(self.copyCode)
 
     def connect(self):
@@ -55,11 +60,20 @@ class CreateGameScreen(TitleScreen):
         self.copyCodeButton.setText(self.game_code)
 
     def gameStart(self):
-        if self.main.game.client.gameStart() and self.main.online:
-            self.c = Communicate()
-            self.c.closeApp.connect(self.closeScreens)
-            self.c.closeApp.emit()
-            self.main.game.run(self.widget.pos().x(), self.widget.pos().y())
+        try:
+            start = self.main.game.client.gameStart()
+            if start and self.main.online:
+                self.c = Communicate()
+                self.c.closeApp.connect(self.closeScreens)
+                self.c.closeApp.emit()
+                self.main.game.run(self.widget.pos().x(), self.widget.pos().y())
+        except:
+            pass
+
+    def backButtonFunc(self):
+        self.game_code = "000000"
+        self.changeScreen(2)
+        self.main.game.client.resetSocket()
 
     def copyCode(self):
         pyperclip.copy(self.game_code)
@@ -71,13 +85,19 @@ class JoinGameScreen(TitleScreen):
         self.main.game = None
 
     def initButtonActions(self):
-        self.backButton.clicked.connect(lambda: self.changeScreen(2))
+        self.backButton.clicked.connect(self.backButtonFunc)
         self.connectButton.clicked.connect(lambda: self.connect())
+
+    def backButtonFunc(self):
+        self.changeScreen(2)
+        self.main.game.client.resetSocket()
 
     def connect(self):
         code = self.gameCodeText.text()
         self.gameCodeText.setText("")
         valid = self.main.game.client.connect(code)
+        if valid == "!codeNotValid":
+            self.gameCodeText.setPlaceholderText("Invalid Code")
         if valid == "!codeValid":
             self.game_code = code
             self.main.game.client.game_code = code

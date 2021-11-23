@@ -74,6 +74,10 @@ class GameClient():
         self.lMove = None
         self.winner = None
 
+    def resetSocket(self):
+        self.closeConnection()
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     def connect(self, game_code):
         if not self.connected:
             self.client.connect((self.ip, self.port))

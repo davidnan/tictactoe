@@ -32,7 +32,6 @@ if __name__ == "__main__":
     main.app.exec_()
     del main.app
     try:
-        print(main.online)
         if not main.online:
             main.game.run()
     except:

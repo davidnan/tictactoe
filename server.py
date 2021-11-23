@@ -179,7 +179,10 @@ class Server():
 
     def gameStartSettings(self, game):
         game.turn = 2
-        self.sendMessage(game.getPlayer1Connection(), "!sg")
+        try:
+            self.sendMessage(game.getPlayer1Connection(), "!sg")
+        except:
+            self.sendMessage(game.getPlayer2Connection(), "!dc")
 
         if not self.checkConnection(game.getPlayer1Connection()):
             self.sendMessage(game.getPlayer2Connection(), "!dc")
