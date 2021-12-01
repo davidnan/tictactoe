@@ -3,9 +3,11 @@ import pickle
 from threading import Thread
 from gameWindow import GameWindow
 import pygame, sys
+import json
 
 class OnlineGame():
-    def __init__(self):
+    def __init__(self, main):
+        self.main = main
         self.window = None
         self.client = GameClient()
         self.cmd = None
@@ -17,7 +19,7 @@ class OnlineGame():
     def recv(self):
         while self.client.connected:
             self.cmd = self.client.recvMessage()
-            self.cmd = self.client.serverMsg(self.cmd)
+            self.cmd = self.client.serverMsg(self.cmd, self.main)
 
     def mouseClick(self, coords):
         if coords[1] < 420:
@@ -42,6 +44,9 @@ class OnlineGame():
                 if self.client.winner != None:
                     self.window.gameOver(self.client.winner)
                     self.client.winner = None
+                if self.cmd == "!ed":
+                    self.main.app.exec_()
+                    self.client.connected = False
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -62,9 +67,10 @@ class OnlineGameWindow(GameWindow):
 
 class GameClient():
     def __init__(self):
-        self.port = 4040
-        self.ip = "192.168.1.245"
+        self.port = 0
+        self.ip = ""
         self.format = "utf-8"
+        self.readData("clientInf.json")
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.game_code = "000000"
@@ -73,6 +79,12 @@ class GameClient():
         self.sign = None
         self.lMove = None
         self.winner = None
+
+    def readData(self, file):
+        with open(file) as f:
+            data = json.load(f)
+        self.ip = data['ip']
+        self.port = data['port']
 
     def resetSocket(self):
         self.closeConnection()
@@ -157,7 +169,7 @@ class GameClient():
             else:
                 validMove = "!notvalid"
 
-    def serverMsg(self, msg):
+    def serverMsg(self, msg, main=None):
         if msg == "!cc":
             self.sendMessage("!ctd")
 
@@ -188,6 +200,9 @@ class GameClient():
             self.lMove = self.recvObject()
             self.lMove[1][0] = self.lMove[1][0] * 140 + 70
             self.lMove[1][1] = self.lMove[1][1] * 140 + 70
+
+        elif msg == "!ed":
+            return "!ed"
 
         elif msg != None:
             print(msg)

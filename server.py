@@ -1,7 +1,7 @@
 import socket, pickle, random
-import threading
 from threading import Thread
 from game import Game
+import json
 from player import Player
 
 class PlayerServer(Player):
@@ -48,16 +48,23 @@ class GameSever(Game):
 class Server():
     def __init__(self):
         # Server information
-        self.ip = "0.0.0.0"
-        self.port = 4040
+        self.ip = ""
+        self.port = 0
         self.format = "utf-8"
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.games = []
+        self.readData("serverInf.json")
 
         self.server.bind((self.ip, self.port))
         self.server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
         self.start()
+
+    def readData(self, file):
+        with open(file) as f:
+            data = json.load(f)
+        self.ip = data['ip']
+        self.port = data['port']
 
     def recvMessage(self, conn):
         msg_length = conn.recv(64).decode(self.format)
@@ -203,28 +210,35 @@ class Server():
 
     def handleGame(self, game):
         self.gameStartSettings(game)
+        try:
+            while game.isGameOn():
+                winner = game.checkForWin()
+                if winner != None:
+                    self.gameEnd(game, winner)
+                elif game.turn == 1:
+                    move = self.requestMove(game, game.getPlayer1Connection())
+                    game.setMove(move, game.getPlayer1Ch())
+                    self.sendMove(game.getPlayer1Connection(), game.getPlayer1Ch(), move)
+                    self.sendMove(game.getPlayer2Connection(), game.getPlayer1Ch(), move)
+                    self.sendTurn(game)
+                    self.showBoard(game)
 
-        while game.isGameOn():
-            winner = game.checkForWin()
-            if winner != None:
-                self.gameEnd(game, winner)
-            elif game.turn == 1:
-                move = self.requestMove(game, game.getPlayer1Connection())
-                game.setMove(move, game.getPlayer1Ch())
-                self.sendMove(game.getPlayer1Connection(), game.getPlayer1Ch(), move)
-                self.sendMove(game.getPlayer2Connection(), game.getPlayer1Ch(), move)
-                self.sendTurn(game)
-                self.showBoard(game)
+                elif game.turn == 2:
+                    move = self.requestMove(game, game.getPlayer2Connection())
+                    game.setMove(move, game.getPlayer2Ch())
+                    self.sendMove(game.getPlayer1Connection(), game.getPlayer2Ch(), move)
+                    self.sendMove(game.getPlayer2Connection(), game.getPlayer2Ch(), move)
+                    self.sendTurn(game)
+                    self.showBoard(game)
 
-            elif game.turn == 2:
-                move = self.requestMove(game, game.getPlayer2Connection())
-                game.setMove(move, game.getPlayer2Ch())
-                self.sendMove(game.getPlayer1Connection(), game.getPlayer2Ch(), move)
-                self.sendMove(game.getPlayer2Connection(), game.getPlayer2Ch(), move)
-                self.sendTurn(game)
-                self.showBoard(game)
+            game.closeConnections()
+        except:
+            if game.turn == 1:
+                self.sendMessage(game.getPlayer2Connection(), "!ed")
+            if game.turn == 2:
+                self.sendMessage(game.getPlayer1Connection(), "!ed")
 
-        game.closeConnections()
+            print("user disconnected")
 
     def start(self):
         self.server.listen()

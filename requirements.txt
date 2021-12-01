@@ -1,21 +1,5 @@
-<<<<<<< HEAD
-certifi==2021.10.8
-charset-normalizer==2.0.7
-docopt==0.6.2
-idna==3.3
-pipreqs==0.4.11
 pygame==2.0.1
 pyperclip==1.8.2
 PyQt5==5.15.4
 PyQt5-Qt5==5.15.2
 PyQt5-sip==12.9.0
-requests==2.26.0
-urllib3==1.26.7
-yarg==0.1.9
-=======
-pygame==2.0.1
-pyperclip==1.8.2
-PyQt5==5.15.4
-PyQt5-Qt5==5.15.2
-PyQt5-sip==12.9.0
->>>>>>> 1.1

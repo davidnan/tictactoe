@@ -50,10 +50,25 @@ class CreateGameScreen(TitleScreen):
         self.main.game = None
         self.main.online = True
         self.game_code = "000000"
+        self.copyCodeButton.installEventFilter(self)
+        self.copyLabel.setText("")
 
     def initButtonActions(self):
         self.backButton.clicked.connect(self.backButtonFunc)
         self.copyCodeButton.clicked.connect(self.copyCode)
+
+    def eventFilter(self, obj, event):
+        if obj == self.copyCodeButton and event.type() == QtCore.QEvent.HoverEnter:
+            self.onHovered()
+        if obj == self.copyCodeButton and event.type() == QtCore.QEvent.HoverLeave:
+            self.offHover()
+        return super().eventFilter(obj, event)
+
+    def onHovered(self):
+        self.copyLabel.setText("copy")
+
+    def offHover(self):
+        self.copyLabel.setText("")
 
     def connect(self):
         self.game_code = self.main.game.client.connect(self.game_code)
