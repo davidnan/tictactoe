@@ -2,11 +2,12 @@ import socket
 import pickle
 from threading import Thread
 from gameWindow import GameWindow
-import pygame, sys
+import pygame
+import sys
 import json
 
 class OnlineGame():
-    def __init__(self, main):
+    def __init__(self, main=None):
         self.main = main
         self.window = None
         self.client = GameClient()
@@ -19,7 +20,8 @@ class OnlineGame():
     def recv(self):
         while self.client.connected:
             self.cmd = self.client.recvMessage()
-            self.cmd = self.client.serverMsg(self.cmd, self.main)
+            self.cmd = self.client.serverMsg(self.cmd)
+
 
     def mouseClick(self, coords):
         if coords[1] < 420:
@@ -33,6 +35,7 @@ class OnlineGame():
         if self.client.game_code != "000000":
             self.recvThread.start()
             self.window = OnlineGameWindow(self.x, self.y)
+            self.window.sign = self.client.sign
             self.window.initSurface()
             self.window.initScoreBoard()
 
@@ -41,9 +44,14 @@ class OnlineGame():
                 if self.client.lMove != None:
                     self.window.showMove(self.client.lMove[1], self.client.lMove[0])
                     self.client.lMove = None
+
+                if self.client.score != None:
+                    self.window.score = self.client.score
+
                 if self.client.winner != None:
                     self.window.gameOver(self.client.winner)
                     self.client.winner = None
+
                 if self.cmd == "!ed":
                     self.main.app.exec_()
                     self.client.connected = False
@@ -64,6 +72,31 @@ class OnlineGame():
 class OnlineGameWindow(GameWindow):
     def __init__(self, x, y):
         super().__init__(x, y)
+        self.score = [0, 0]
+        self.sign = None
+
+    def initScoreBoard(self):
+        if self.game.player1.getName() == None:
+            player1Text = "You"
+        else: player1Text = self.game.player1.getName()
+
+        if self.game.player2.getName() == None:
+            player2Text = "Opponent"
+        else: player2Text = self.game.player2.getName()
+
+        if self.sign == "X":
+            player1Label = pygame.font.SysFont("comicsansms", 27).render(player1Text, True, (255, 32, 110))
+            player2Label = pygame.font.SysFont("comicsansms", 27).render(player2Text, True, (65, 234, 212))
+        else:
+            player1Label = pygame.font.SysFont("comicsansms", 27).render(player1Text, True, (65, 234, 212))
+            player2Label = pygame.font.SysFont("comicsansms", 27).render(player2Text, True, (255, 32, 110))
+
+        text = self.turnText.render("X", True, (255, 32, 110))
+        self.screen.blit(text, ((self.WIDTH - 50) / 2, 470))
+        self.screen.blit(player1Label, (45, 440))
+        self.screen.blit(player2Label, (290, 440))
+        self.screen.blit(pygame.font.SysFont("comicsansms", 60).render(str(self.score[0]), True, (255, 255, 255)), (53, 470))
+        self.screen.blit(pygame.font.SysFont("comicsansms", 60).render(str(self.score[1]), True, (255, 255, 255)), (338, 470))
 
 class GameClient():
     def __init__(self):
@@ -73,12 +106,14 @@ class GameClient():
         self.readData("clientInf.json")
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        self.game_code = "000000"
+        self.game_code = "!gameCodeStart"
         self.connected = False
         self.turn = None
         self.sign = None
         self.lMove = None
         self.winner = None
+        self.board = None
+        self.score = [0, 0]
 
     def readData(self, file):
         with open(file) as f:
@@ -149,27 +184,7 @@ class GameClient():
             obj = pickle.loads(self.client.recv(length))
             return obj
 
-    def sendMove(self, args):
-        move = args
-        if (0 <= move[0] < 3 and 0 <= move[1] < 3):
-            self.sendObject(move)
-            validMove = "!valid"
-        else:
-            validMove = "!notvalid"
-
-        while validMove != "!valid":
-            move = []
-            x = int(input("row: "))  # move
-            move.append(x)
-            x = int(input("column: "))  # input
-            move.append(x)
-            if (0 <= move[0] < 3 and 0 <= move[1] < 3) and move[0] != None and move[1] != None:
-                self.sendObject(move)
-                validMove = self.recvMessage()
-            else:
-                validMove = "!notvalid"
-
-    def serverMsg(self, msg, main=None):
+    def serverMsg(self, msg):
         if msg == "!cc":
             self.sendMessage("!ctd")
 
@@ -179,15 +194,16 @@ class GameClient():
 
         elif msg == "!sgn":
             self.sign = self.recvMessage()
-
-        elif msg == "!rqtmove":
-            return "!rqtmove"
+            return "!sgn"
 
         elif msg == "!gameTurn":
             self.turn = int(self.recvMessage())
 
         elif msg == "!winner":
             self.winner = self.recvMessage()
+
+        elif msg == "!score":
+            self.score = self.recvObject()
 
         elif msg == "!dc":
             self.connected = False
@@ -204,7 +220,7 @@ class GameClient():
         elif msg == "!ed":
             return "!ed"
 
-        elif msg != None:
+        elif msg is not None:
             print(msg)
 
     def start(self):
@@ -215,11 +231,3 @@ class GameClient():
             except ConnectionResetError:
                 print("Server error")
                 self.connected = False
-
-
-if __name__ == "__main__":
-    # game = GameClient()
-    # game.start()
-    # game_code = input("Game code: ")
-    game = OnlineGame()
-    game.run()

@@ -1,8 +1,3 @@
-import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QCoreApplication
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.uic import loadUi
 from titleScreen import TitleScreen
 from onePlayerGameWindow import OpgWindow
 from botLogic import EasyBot, MediumBot, HardBot

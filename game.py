@@ -1,5 +1,4 @@
 from player import Player
-import sys
 
 class Game():
     def __init__(self):
@@ -20,7 +19,6 @@ class Game():
             print(self.board[i])
 
     def setMove(self, coords, player):
-        print(self.board[coords[0]][coords[1]])
         self.board[coords[0]][coords[1]] = player
         self.__boardCount += 1
         if self.__boardCount == 8:

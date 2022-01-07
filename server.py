@@ -149,12 +149,23 @@ class Server():
             self.sendMessage(game.getPlayer2Connection(), "0")
             game.turn = 1
 
-
     def sendWinner(self, game, winner):
         self.sendMessage(game.getPlayer1Connection(), "!winner")
         self.sendMessage(game.getPlayer2Connection(), "!winner")
         self.sendMessage(game.getPlayer1Connection(), winner)
         self.sendMessage(game.getPlayer2Connection(), winner)
+        self.sendMessage(game.getPlayer1Connection(), "!score")
+        self.sendMessage(game.getPlayer2Connection(), "!score")
+
+        if game.player1.getCh() == winner:
+            game.player1.incrementScore()
+            self.sendObject(game.getPlayer1Connection(), [game.player1.getScore(), game.player2.getScore()])
+            self.sendObject(game.getPlayer2Connection(), [game.player2.getScore(), game.player1.getScore()])
+        else:
+            game.player2.incrementScore()
+            self.sendObject(game.getPlayer2Connection(), [game.player2.getScore(), game.player1.getScore()])
+            self.sendObject(game.getPlayer1Connection(), [game.player1.getScore(), game.player2.getScore()])
+
 
     def gameEnd(self, game, winner):
         print(winner)
@@ -206,6 +217,7 @@ class Server():
             self.sendMessage(game.getPlayer1Connection(), "!dc")
 
         if game.isGameOn():
+            self.sendSigns(game)
             self.sendTurn(game)
 
     def handleGame(self, game):
@@ -249,7 +261,7 @@ class Server():
                 conn, addr = self.server.accept()
                 game_code = self.recvMessage(conn)
                 game_code_not_found = True
-                if game_code == "000000" or game_code == "0":
+                if game_code == "!gameCodeStart":
                     game_code_not_found = False
                     game_code = random.randint(100000, 999999)
                     for game in self.games:

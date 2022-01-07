@@ -1,15 +1,9 @@
-import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QCoreApplication
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.uic import loadUi
 from PyQt5.QtCore import pyqtSignal, QObject
 
 from titleScreen import TitleScreen
-from gameClient import OnlineGame
 from threading import Thread
 import pyperclip
-import socket
 
 class Communicate(QObject):
     closeApp = pyqtSignal()
@@ -33,7 +27,7 @@ class OnlineScreen(TitleScreen):
 
     def connectToServer(self):
         self.changeScreen(3)
-        if self.main.createGameScreen.game_code == "000000":
+        if self.main.createGameScreen.game_code == "!gameCodeStart":
             try:
                 self.hasCode = True
                 self.main.createGameScreen.connect()
@@ -49,7 +43,8 @@ class CreateGameScreen(TitleScreen):
         self.game_code = None
         self.main.game = None
         self.main.online = True
-        self.game_code = "000000"
+        self.game_code = "!gameCodeStart"
+
         self.copyCodeButton.installEventFilter(self)
         self.copyLabel.setText("")
 
@@ -86,7 +81,7 @@ class CreateGameScreen(TitleScreen):
             pass
 
     def backButtonFunc(self):
-        self.game_code = "000000"
+        self.game_code = "!gameCodeStart"
         self.changeScreen(2)
         self.main.game.client.resetSocket()
 

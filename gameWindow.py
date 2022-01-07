@@ -66,7 +66,6 @@ class GameWindow():
             self.screen.blit(shape_surf, (0, 0, self.WIDTH, self.HEIGHT))
             pygame.display.update()
 
-
     def gameOverScreen(self, winner):
         self.transparentScreen()
         font_winner = pygame.font.SysFont("comicsansms", 120)
@@ -114,6 +113,7 @@ class GameWindow():
             self.screen.blit(self.xShow, text_rect)
         self.deleteTurnText()
         turn = lambda x: "0" if x == "X" else "X"
+
         self.drawTurnText(turn(player))
 
     def wait(self):

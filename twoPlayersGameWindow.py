@@ -9,7 +9,6 @@ class TpgWindow(GameWindow):
         self.initScoreBoard()
 
     def run(self):
-
         while True:
             winner = self.game.checkForWin()
             if winner != None:

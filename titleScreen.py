@@ -1,9 +1,6 @@
-import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QCoreApplication
-from PyQt5.QtWidgets import QApplication, QMainWindow, QAction
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QMainWindow
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import QThread
 from gameClient import OnlineGame
 from twoPlayersGameWindow import TpgWindow
 
@@ -16,16 +13,6 @@ class TitleScreen(QMainWindow):
         self.main.online = False
         self.show()
         self.initButtonActions()
-
-    def closeEvent(self, event):
-        close = QtWidgets.QMessageBox.question(self,
-                                               "QUIT",
-                                               "Are you sure want to stop process?",
-                                               QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
-        if close == QtWidgets.QMessageBox.Yes:
-            event.accept()
-        else:
-            event.ignore()
 
     def initButtonActions(self):
         self.onePlayerButton.clicked.connect(lambda: self.changeScreen(1))

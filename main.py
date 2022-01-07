@@ -1,10 +1,8 @@
-from gameWindow import GameWindow
-import pygame
 import sys
 from titleScreen import TitleScreen
 from onlineScreen import OnlineScreen, CreateGameScreen, JoinGameScreen
 from onePlayerScreen import OnePlayerScreen
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 
 class Main():
     def __init__(self):
