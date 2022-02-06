@@ -60,7 +60,7 @@ class GameWindow():
 
     def transparentScreen(self):
         shape_surf = pygame.Surface(pygame.Rect((0, 0, self.WIDTH, self.HEIGHT)).size, pygame.SRCALPHA)
-        for i in range(0, 255):
+        for _ in range(0, 255):
             shape_surf.set_alpha(1)
             pygame.draw.rect(shape_surf, (12, 15, 10), shape_surf.get_rect())
             self.screen.blit(shape_surf, (0, 0, self.WIDTH, self.HEIGHT))

@@ -47,6 +47,8 @@ class OnlineGame():
 
                 if self.client.score != None:
                     self.window.score = self.client.score
+                    self.window.deleteScoreText()
+                    self.window.initScores()
 
                 if self.client.winner != None:
                     self.window.gameOver(self.client.winner)
@@ -75,6 +77,19 @@ class OnlineGameWindow(GameWindow):
         self.score = [0, 0]
         self.sign = None
 
+    def initScores(self):
+        self.screen.blit(pygame.font.SysFont("comicsansms", 60).render(str(self.score[0]), True, (255, 255, 255)),
+                         (53, 470))
+        self.screen.blit(pygame.font.SysFont("comicsansms", 60).render(str(self.score[1]), True, (255, 255, 255)),
+                         (338, 470))
+
+    def deleteScoreText(self):
+        dark_gray = (12, 15, 10)
+        rect1 = pygame.Rect(30, 480, 70, 85)
+        pygame.draw.rect(self.screen, dark_gray, rect1)
+        rect2 = pygame.Rect(310, 480, 70, 85)
+        pygame.draw.rect(self.screen, dark_gray, rect2)
+
     def initScoreBoard(self):
         if self.game.player1.getName() == None:
             player1Text = "You"
@@ -95,8 +110,8 @@ class OnlineGameWindow(GameWindow):
         self.screen.blit(text, ((self.WIDTH - 50) / 2, 470))
         self.screen.blit(player1Label, (45, 440))
         self.screen.blit(player2Label, (290, 440))
-        self.screen.blit(pygame.font.SysFont("comicsansms", 60).render(str(self.score[0]), True, (255, 255, 255)), (53, 470))
-        self.screen.blit(pygame.font.SysFont("comicsansms", 60).render(str(self.score[1]), True, (255, 255, 255)), (338, 470))
+        self.initScores()
+
 
 class GameClient():
     def __init__(self):

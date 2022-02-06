@@ -161,7 +161,7 @@ class Server():
             game.player1.incrementScore()
             self.sendObject(game.getPlayer1Connection(), [game.player1.getScore(), game.player2.getScore()])
             self.sendObject(game.getPlayer2Connection(), [game.player2.getScore(), game.player1.getScore()])
-        else:
+        elif winner != "T":
             game.player2.incrementScore()
             self.sendObject(game.getPlayer2Connection(), [game.player2.getScore(), game.player1.getScore()])
             self.sendObject(game.getPlayer1Connection(), [game.player1.getScore(), game.player2.getScore()])
@@ -233,7 +233,6 @@ class Server():
                     self.sendMove(game.getPlayer1Connection(), game.getPlayer1Ch(), move)
                     self.sendMove(game.getPlayer2Connection(), game.getPlayer1Ch(), move)
                     self.sendTurn(game)
-                    self.showBoard(game)
 
                 elif game.turn == 2:
                     move = self.requestMove(game, game.getPlayer2Connection())
