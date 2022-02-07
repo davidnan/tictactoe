@@ -165,6 +165,10 @@ class Server():
             game.player2.incrementScore()
             self.sendObject(game.getPlayer2Connection(), [game.player2.getScore(), game.player1.getScore()])
             self.sendObject(game.getPlayer1Connection(), [game.player1.getScore(), game.player2.getScore()])
+        if winner == "T":
+            self.sendObject(game.getPlayer2Connection(), [game.player2.getScore(), game.player1.getScore()])
+            self.sendObject(game.getPlayer1Connection(), [game.player1.getScore(), game.player2.getScore()])
+
 
 
     def gameEnd(self, game, winner):
@@ -211,9 +215,6 @@ class Server():
         else:
             game.turnOffGame()
             self.sendMessage(game.getPlayer2Connection(), "!dc")
-            self.sendMessage(game.getPlayer1Connection(), "!dc")
-
-        if not self.checkConnection(game.getPlayer2Connection()):
             self.sendMessage(game.getPlayer1Connection(), "!dc")
 
         if game.isGameOn():

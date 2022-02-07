@@ -52,6 +52,7 @@ class OnlineGame():
 
                 if self.client.winner != None:
                     self.window.gameOver(self.client.winner)
+                    self.window.winner = self.client.winner
                     self.client.winner = None
 
                 if self.cmd == "!ed":
@@ -76,6 +77,7 @@ class OnlineGameWindow(GameWindow):
         super().__init__(x, y)
         self.score = [0, 0]
         self.sign = None
+        self.winner = None
 
     def initScores(self):
         self.screen.blit(pygame.font.SysFont("comicsansms", 60).render(str(self.score[0]), True, (255, 255, 255)),
@@ -102,11 +104,19 @@ class OnlineGameWindow(GameWindow):
         if self.sign == "X":
             player1Label = pygame.font.SysFont("comicsansms", 27).render(player1Text, True, (255, 32, 110))
             player2Label = pygame.font.SysFont("comicsansms", 27).render(player2Text, True, (65, 234, 212))
+
         else:
             player1Label = pygame.font.SysFont("comicsansms", 27).render(player1Text, True, (65, 234, 212))
             player2Label = pygame.font.SysFont("comicsansms", 27).render(player2Text, True, (255, 32, 110))
 
-        text = self.turnText.render("X", True, (255, 32, 110))
+        turn = lambda x: "0" if x == "X" else "X"
+        self.turn = turn(self.winner)
+        if self.turn == "X":
+            color = (255, 32, 110)
+        else:
+            color = (65, 234, 212)
+
+        text = self.turnText.render(self.turn, True, color)
         self.screen.blit(text, ((self.WIDTH - 50) / 2, 470))
         self.screen.blit(player1Label, (45, 440))
         self.screen.blit(player2Label, (290, 440))
