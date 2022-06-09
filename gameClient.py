@@ -245,9 +245,6 @@ class GameClient():
         elif msg == "!ed":
             return "!ed"
 
-        elif msg is not None:
-            print(msg)
-
     def start(self):
         while self.connected:
             try:
