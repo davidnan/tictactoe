@@ -6,6 +6,7 @@
   - Hard
 - On your computer with a friend
 - Online with a friend
+## Running the project
 
 1. To set up the project you need to run:
   ```
